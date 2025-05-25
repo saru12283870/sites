@@ -24,9 +24,19 @@ class BasicCommand {
         this.callback=callback
         this.name=name
     }
+    run(arg,opt){
+        this.callback(arg,opt)
+    }
     add(){
         commands[commands.length]=this
     }
+}
+class OptionCheckCommand extends BasicCommand{
+    constructor(callback,name,checkOptions=[]){
+        super(callback,name)
+        this.checkOption=checkOptions
+    }
+    
 }
 async function init(){
     await BFDIdb.wait()
@@ -58,7 +68,7 @@ function analysis(input="") {
 async function run(command,arg,opt) {
     Command=commands.find((item)=>{return command===item.name})
     try{
-        await Command.callback(arg,opt)
+        await Command.callback(arg,opt,more)
     }catch{
         log("notFindCommand")
     }
