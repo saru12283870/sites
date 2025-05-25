@@ -1,0 +1,10 @@
+input{
+    field-sizing: content;
+    resize: none;
+    min-width: 300px;
+    outline: none;
+    border: none;
+    background-color: rgb(34, 34, 34);
+    color: honeydew;
+    font: 16px "Noto Sans JP";
+}
