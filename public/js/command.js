@@ -1,2 +1,4 @@
-const bcd=new BasicCommand(async(arg,opt)=>{log(arg.toString());log(opt.toString())},"test")
-bcd.add()
+new BasicCommand(async ()=>{
+    BFD=await openFile()
+    await BFDSet()
+},'bcd',true).add()

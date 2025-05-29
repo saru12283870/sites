@@ -20,11 +20,12 @@ let EVIdb=new LDBL({
     name:"EV"
 })
 class BasicCommand {
-    constructor(callback,name) {
+    constructor(callback,name,await=false) {
         this.callback=callback
         this.name=name
+        this.await=await
     }
-    run(arg,opt){
+    async run(arg,opt){
         this.callback(arg,opt)
     }
     add(){
@@ -32,33 +33,41 @@ class BasicCommand {
     }
 }
 class OptionCheckCommand extends BasicCommand{
-    constructor(callback,name,checkOptions=[]){
+    constructor(callback,name,checkOptions=[],await){
         super(callback,name)
         this.checkOption=checkOptions
+        this.await=await
     }
-    
+    async run(arg=[],opt=[]){
+        let more={opt:{}}
+        for(const item of this.checkOption){
+            more.opt[item] = opt.find((element)=>{return element==item})==item?true:false
+        }
+        if (this.await) {
+            await this.callback(arg,opt,more)
+        }else{
+            this.callback(arg,opt,more)
+        }
+    }
 }
 async function init(){
     await BFDIdb.wait()
-if (await BFDIdb.get("BFD")) {
-    console.log("a");
+    BFD=await BFDIdb.get('BFD')
+    BD=await BFDIdb.get('BD')==undefined?'':await BFDIdb.get('BD')
+    CFD=await BFDIdb.get('CFD')
+    CD=await BFDIdb.get('CD')==undefined?'':await BFDIdb.get('CD')
 }
-BFD=await BFDIdb.get('BFD')
-BD=await BFDIdb.get('BD')==undefined?'':await BFDIdb.get('BD')
-CFD=await BFDIdb.get('CFD')
-CD=await BFDIdb.get('CD')==undefined?'':await BFDIdb.get('CD')
-}
-function BFDSet() {
+async function BFDSet() {
     CFD=BFD
     BD=BFD.name
     CD=CFD.name
-    BFDIdb.set(BFD,"BFD")
-    BFDIdb.set(BD,'BD')
-    BFDIdb.set(CFD,"CFD")
-    BFDIdb.set(CD,'CD')
+    await BFDIdb.set(BFD,"BFD")
+    await BFDIdb.set(BD,'BD')
+    await BFDIdb.set(CFD,"CFD")
+    await BFDIdb.set(CD,'CD')
 }
 function analysis(input="") {
-    let inputs=input.trim().replace(/[\s\t]+/,' ').split(' ')
+    let inputs=input.replace(/[\s\t]+/,' ').trim().split(' ')
     const command=inputs[0]
     inputs=inputs.slice(1)
     const opt=inputs.filter((item)=>{return item.substring(0,1)==='-'})
@@ -66,9 +75,9 @@ function analysis(input="") {
     return [arg,opt,command]
 }
 async function run(command,arg,opt) {
-    Command=commands.find((item)=>{return command===item.name})
+    const Command=commands.find((item)=>{return command===item.name})
     try{
-        await Command.callback(arg,opt,more)
+        await Command.run(arg,opt)
     }catch{
         log("notFindCommand")
     }
@@ -82,10 +91,10 @@ async function main() {
     command=input[2]
     if(BFD==undefined){
         BFD=await openFile()
-        BFDSet()
+        await BFDSet()
     }
     await run(command,arg,opt)
-    main()
+    await main()
 }
 async function all() {
     await init()
