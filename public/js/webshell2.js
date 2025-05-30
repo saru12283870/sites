@@ -33,16 +33,17 @@ class BasicCommand {
     }
 }
 class OptionCheckCommand extends BasicCommand{
-    constructor(callback,name,checkOptions=[],await){
-        super(callback,name)
+    constructor(callback,name,checkOptions=[],await=false){
+        super(callback,name,await)
         this.checkOption=checkOptions
-        this.await=await
     }
     async run(arg=[],opt=[]){
         let more={opt:{}}
+        console.log(this.checkOption);
         for(const item of this.checkOption){
-            more.opt[item] = opt.find((element)=>{return element==item})==item?true:false
+            more.opt[item] = opt.find((element)=>{return element===item})==undefined?false:true
         }
+        console.log(more);
         if (this.await) {
             await this.callback(arg,opt,more)
         }else{
@@ -70,7 +71,7 @@ function analysis(input="") {
     let inputs=input.replace(/[\s\t]+/,' ').trim().split(' ')
     const command=inputs[0]
     inputs=inputs.slice(1)
-    const opt=inputs.filter((item)=>{return item.substring(0,1)==='-'})
+    const opt=inputs.filter((item)=>{return item.substring(0,1)==='-'}).map((element)=>{console.log(element);return element.replace(/^-+(\w+)$-*/,'$1')})
     const arg=inputs.filter((item)=>{return !(item.substring(0,1)==='-')&!(item.substring(0,1)==='$')})
     return [arg,opt,command]
 }
@@ -94,6 +95,7 @@ async function main() {
         await BFDSet()
     }
     await run(command,arg,opt)
+    log()
     await main()
 }
 async function all() {
