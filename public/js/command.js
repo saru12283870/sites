@@ -1,7 +1,7 @@
 new BasicCommand(async ()=>{
     BFD=await openFile()
     await BFDSet()
-},'bcd',true).add()
+},'bd',true).add()
 new OptionCheckCommand((arg=[],opt,more)=>{
     console.log(more.opt.nb);
     if (more.opt.nb) {
